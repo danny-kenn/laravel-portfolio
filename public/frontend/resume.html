@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAVID NGUNZU KIAMBA - Resume</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            line-height: 1.4;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            font-size: 11pt;
+        }
+
+        /* Resume Container */
+        .resume-container {
+            width: 210mm; /* A4 width */
+            min-height: 297mm; /* A4 height */
+            background: white;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            display: flex;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        /* Left Sidebar with beautiful gradient */
+        .sidebar {
+            width: 35%;
+            background: linear-gradient(180deg, #1a4f8c 0%, #0d2c4d 100%);
+            color: white;
+            padding: 40px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Gradient overlay for sidebar */
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(26, 79, 140, 0.9) 0%, rgba(44, 62, 80, 0.95) 100%);
+            z-index: 1;
+        }
+
+        .sidebar > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Main Content */
+        .main-content {
+            width: 65%;
+            padding: 40px 30px;
+        }
+
+        /* Header Styles */
+        .header-main {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 20px;
+        }
+
+        .name {
+            font-size: 28pt;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .title {
+            font-size: 14pt;
+            font-weight: 600;
+            color: #1a4f8c;
+        }
+
+        /* Sidebar Header */
+        .header-sidebar {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .name-sidebar {
+            font-size: 22pt;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .title-sidebar {
+            font-size: 12pt;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        /* Professional Badge - Subtle */
+        .professional-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 9.5pt;
+            font-weight: 500;
+            margin-top: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Contact Information */
+        .contact-info {
+            margin-bottom: 30px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            font-size: 10.5pt;
+        }
+
+        .contact-icon {
+            width: 25px;
+            color: #4da8da;
+            font-size: 12pt;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 30px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 13pt;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4da8da;
+            position: relative;
+        }
+
+        .section-title-main {
+            font-size: 13pt;
+            font-weight: 700;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1a4f8c;
+        }
+
+        /* Items */
+        .item {
+            margin-bottom: 25px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .item-title {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 12pt;
+        }
+
+        .item-subtitle {
+            color: #1a4f8c;
+            font-weight: 600;
+            font-size: 11pt;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .item-date {
+            color: #7f8c8d;
+            font-size: 10pt;
+            font-weight: 600;
+            background: #f8f9fa;
+            padding: 4px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        /* Lists */
+        .item-details {
+            padding-left: 20px;
+        }
+
+        .item-details li {
+            margin-bottom: 10px;
+            font-size: 11pt;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .item-details li::before {
+            content: '▸';
+            color: #1a4f8c;
+            position: absolute;
+            left: -20px;
+            font-weight: bold;
+        }
+
+        /* Skills */
+        .skill-item {
+            margin-bottom: 25px;
+        }
+
+        .skill-name {
+            font-weight: 600;
+            color: white;
+            font-size: 11pt;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .skill-items {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 10.5pt;
+            line-height: 1.6;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            margin: 4px 3px;
+            border-radius: 4px;
+            font-size: 10pt;
+            backdrop-filter: blur(5px);
+            line-height: 1.3;
+        }
+
+        /* Availability */
+        .availability {
+            background: rgba(77, 168, 218, 0.2);
+            border-left: 4px solid #4da8da;
+            padding: 18px;
+            border-radius: 4px;
+            margin-top: 15px;
+            backdrop-filter: blur(5px);
+            margin-bottom: 15px;
+        }
+
+        .availability-dates {
+            font-weight: 700;
+            color: white;
+            font-size: 11pt;
+            margin-top: 8px;
+            display: block;
+        }
+
+        /* Control Buttons */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13pt;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a4f8c 0%, #2c3e50 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(26, 79, 140, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(26, 79, 140, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #1a4f8c;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            transform: translateY(-3px);
+        }
+
+        /* Print styles */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 210mm;
+                min-height: 100vh;
+                font-size: 11pt;
+            }
+            
+            .resume-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 210mm !important;
+                min-height: 297mm !important;
+                page-break-after: always;
+            }
+            
+            .controls {
+                display: none !important;
+            }
+            
+            /* Force colors in print */
+            .sidebar {
+                background: linear-gradient(180deg, #1a4f8c 0%, #0d2c4d 100%) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            .skill-tag {
+                background: rgba(255, 255, 255, 0.15) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                padding: 5px 10px !important;
+                margin: 4px 3px !important;
+            }
+            
+            .availability {
+                background: rgba(77, 168, 218, 0.2) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            .professional-badge {
+                background: rgba(255, 255, 255, 0.1) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* Improved spacing for print */
+            .section {
+                margin-bottom: 25px !important;
+            }
+            
+            .skill-item {
+                margin-bottom: 20px !important;
+            }
+            
+            .skill-name {
+                margin-bottom: 8px !important;
+            }
+            
+            .contact-item {
+                margin-bottom: 15px !important;
+            }
+            
+            .item {
+                margin-bottom: 20px !important;
+            }
+            
+            .item-details li {
+                margin-bottom: 8px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Resume Content -->
+    <div class="resume-container" id="resume-content">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="header-sidebar">
+                <div class="name-sidebar">DAVID NGUNZU KIAMBA</div>
+                <div class="title-sidebar">Software Engineering Student</div>
+                <div class="title-sidebar">Aspiring Cybersecurity & Software Intern</div>
+                <div class="professional-badge">
+                    <i class="fas fa-user-check"></i> QSK Member
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="section">
+                <h2 class="section-title">Contact</h2>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope contact-icon"></i>
+                        <span>davidkiamba336@gmail.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone contact-icon"></i>
+                        <span>+254 112083153</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt contact-icon"></i>
+                        <span>P.O Box 1217 – 00241<br>Kitengela, Kenya</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-github contact-icon"></i>
+                        <span>github.com/danny-kenn</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Skills -->
+            <div class="section">
+                <h2 class="section-title">Technical Skills</h2>
+                <div class="skill-item">
+                    <div class="skill-name">Programming & Scripting</div>
+                    <div class="skill-items">
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">PHP</span>
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">C</span>
+                        <span class="skill-tag">HTML5</span>
+                        <span class="skill-tag">CSS3</span>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Databases</div>
+                    <div class="skill-items">
+                        <span class="skill-tag">PostgreSQL</span>
+                        <span class="skill-tag">MySQL</span>
+                        <span class="skill-tag">SQL Queries</span>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Tools & Technologies</div>
+                    <div class="skill-items">
+                        <span class="skill-tag">VS Code</span>
+                        <span class="skill-tag">XAMPP</span>
+                        <span class="skill-tag">Git</span>
+                        <span class="skill-tag">GitHub</span>
+                        <span class="skill-tag">TablePlus</span>
+                        <span class="skill-tag">pgAdmin</span>
+                        <span class="skill-tag">Linux</span>
+                        <span class="skill-tag">Windows</span>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Cybersecurity & Standards</div>
+                    <div class="skill-items">
+                        <span class="skill-tag">Vulnerability Assessment</span>
+                        <span class="skill-tag">Penetration Testing</span>
+                        <span class="skill-tag">ISO 9001</span>
+                        <span class="skill-tag">ISO 27001</span>
+                        <span class="skill-tag">ISO 27701</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certifications -->
+            <div class="section">
+                <h2 class="section-title">Certifications</h2>
+                <ul class="item-details" style="color: rgba(255,255,255,0.9);">
+                    <li>ISO 9001 Lead Auditor - IRLA</li>
+                    <li>ISO 27001 Lead Auditor - IRLA</li>
+                    <li>Quality Society of Kenya (QSK) Member</li>
+                    <li>Vulnerability Assessment and Penetration Testing - Alison</li>
+                    <li>Cybersecurity Fundamentals - Alison</li>
+                    <li>ISO 27701 Privacy Management - IRLA</li>
+                </ul>
+            </div>
+
+            <!-- Availability -->
+            <div class="section">
+                <h2 class="section-title">Availability</h2>
+                <div class="availability">
+                    Available for industrial attachment / internship from:<br>
+                    <span class="availability-dates">May – August 31, 2026</span>
+                </div>
+                <p style="margin-top: 10px; font-size: 10.5pt; opacity: 0.9; margin-bottom: 15px;">
+                    Eager to contribute to real-world projects while learning from industry professionals.
+                </p>
+            </div>
+
+            <!-- Soft Skills -->
+            <div class="section">
+                <h2 class="section-title">Soft Skills</h2>
+                <ul class="item-details" style="color: rgba(255,255,255,0.9);">
+                    <li>Strong problem-solving and analytical mindset</li>
+                    <li>Self-driven learner, curious and proactive</li>
+                    <li>Excellent team collaboration and communication</li>
+                    <li>Able to work independently and adapt</li>
+                    <li>Open to feedback and mentorship</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header-main">
+                <h1 class="name">DAVID NGUNZU KIAMBA</h1>
+                <div class="title">Software Engineering Student | Aspiring Cybersecurity & Software Engineering Intern</div>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <span style="background: #f8f9fa; padding: 4px 10px; border-radius: 15px; font-size: 9.5pt; color: #1a4f8c;">
+                        <i class="fas fa-graduation-cap"></i> University Student
+                    </span>
+                    <span style="background: #f8f9fa; padding: 4px 10px; border-radius: 15px; font-size: 9.5pt; color: #1a4f8c;">
+                        <i class="fas fa-user-check"></i> QSK Member
+                    </span>
+                </div>
+            </div>
+
+            <!-- Professional Summary -->
+            <div class="section">
+                <h2 class="section-title-main">Professional Summary</h2>
+                <p style="font-size: 11pt; line-height: 1.5; text-align: justify; margin-bottom: 25px;">
+                    <strong>Motivated and detail-oriented Third Year Software Engineering student</strong> at the University of Eastern Africa, Baraton, with strong interest in <strong>software systems, backend development, cybersecurity, and information systems auditing</strong>. Experienced in developing functional software systems and managing database-driven projects, with <strong>hands-on exposure to ISO standards, vulnerability assessment, and audit processes</strong>. 
+                    
+                    <br><br>
+                    
+                    As a <strong>certified ISO 9001/27001 Lead Auditor and member of the Quality Society of Kenya (QSK)</strong>, I understand quality management principles that can enhance software development processes. Eager to apply technical knowledge to real-world challenges, contribute to innovative solutions, and collaborate with industry professionals. <strong>Highly enthusiastic about building systems that are efficient, secure, and scalable</strong>, while continuously growing as a technology professional.
+                </p>
+            </div>
+
+            <!-- Work Experience -->
+            <div class="section">
+                <h2 class="section-title-main">Work Experience</h2>
+                <div class="item">
+                    <div class="item-header">
+                        <div class="item-title">Software Engineer Intern</div>
+                        <div class="item-date">December 2022 – May 2023</div>
+                    </div>
+                    <div class="item-subtitle">Intertek</div>
+                    <ul class="item-details">
+                        <li>Supported client certification and auditing activities for <strong>organizations including United Pharma (ISO 9001), Haco Industries (ISO 9001), and Beiersdorf (QSHE)</strong></li>
+                        <li>Contributed to sales and reporting efforts for <strong>companies like Ashut Plastics, Ashut Engineers, and Makueni Fruit Development and Marketing Authority</strong></li>
+                        <li>Assisted in <strong>IT audits, data verification, and document management</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Project Experience -->
+            <div class="section">
+                <h2 class="section-title-main">Project Experience</h2>
+                
+                <div class="item">
+                    <div class="item-header">
+                        <div class="item-title">School Management System</div>
+                    </div>
+                    <div class="item-subtitle">Kitengela Adventist School (Personal Project)</div>
+                    <ul class="item-details">
+                        <li>Developed <strong>relational database for managing students, teachers, classes, and grades</strong></li>
+                        <li>Built <strong>backend with PHP & MySQL and frontend with HTML, CSS, Tailwind</strong></li>
+                        <li>Implemented <strong>CRUD operations, user authentication, and reporting functions</strong></li>
+                    </ul>
+                </div>
+
+                <div class="item">
+                    <div class="item-header">
+                        <div class="item-title">Apartment Management System</div>
+                    </div>
+                    <div class="item-subtitle">Multi-Tenant (Ongoing Personal Project)</div>
+                    <ul class="item-details">
+                        <li>Designed <strong>multi-tenant database structure</strong> for managing apartment units, tenants, payments, and leases</li>
+                        <li>Practiced <strong>relational database design and query optimization</strong></li>
+                        <li>Demonstrates ongoing commitment to <strong>building scalable systems</strong></li>
+                    </ul>
+                </div>
+
+                <div class="item">
+                    <div class="item-header">
+                        <div class="item-title">GitHub Portfolio</div>
+                    </div>
+                    <div class="item-subtitle">Other Projects</div>
+                    <ul class="item-details">
+                        <li>Hosted at <strong>https://github.com/danny-kenn</strong></li>
+                        <li>Includes <strong>smaller Python, PHP, and web development projects</strong></li>
+                        <li>Showcases <strong>coding practice, project structure, and database interaction</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Education -->
+            <div class="section">
+                <h2 class="section-title-main">Education</h2>
+                
+                <div class="item">
+                    <div class="item-header">
+                        <div class="item-title">Bachelor of Science in Software Engineering</div>
+                        <div class="item-date">2023 – Present</div>
+                    </div>
+                    <div class="item-subtitle">University of Eastern Africa, Baraton | Expected Graduation: August 2027</div>
+                    <ul class="item-details">
+                        <li><strong>Attachment Period:</strong> May – August 31, 2026</li>
+                        <li><strong>Relevant Coursework:</strong> Web Development (PHP, HTML, CSS, JavaScript), Software Engineering, Database Systems, Computer Networks, Information Systems</li>
+                    </ul>
+                </div>
+
+                <div class="item">
+                    <div class="item-header">
+                        <div class="item-title">Certificate in Information Technology</div>
+                        <div class="item-date">2022</div>
+                    </div>
+                    <div class="item-subtitle">Kenya Institute of Computer Studies</div>
+                    <ul class="item-details">
+                        <li><strong>Microsoft Office Suite:</strong> Word, Excel, Access, PowerPoint, Publisher</li>
+                        <li><strong>Internet and Email Essentials</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Additional Qualifications -->
+            <div class="section">
+                <h2 class="section-title-main">Additional Qualifications</h2>
+                <div class="item">
+                    <div class="item-header">
+                        <div class="item-title">Professional Certifications</div>
+                        <div class="item-date">2023 – 2024</div>
+                    </div>
+                    <div class="item-subtitle">IRLA & Quality Society of Kenya</div>
+                    <ul class="item-details">
+                        <li><strong>ISO 9001 Lead Auditor:</strong> Quality Management Systems</li>
+                        <li><strong>ISO 27001 Lead Auditor:</strong> Information Security Management</li>
+                        <li><strong>Quality Society of Kenya (QSK):</strong> Full Member</li>
+                        <li><strong>VAPT Certification:</strong> Vulnerability Assessment and Penetration Testing</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Interests & Career Focus -->
+            <div class="section">
+                <h2 class="section-title-main">Interests & Career Focus</h2>
+                <ul class="item-details">
+                    <li><strong>Backend systems and system architecture</strong></li>
+                    <li><strong>Information systems auditing & cybersecurity</strong></li>
+                    <li><strong>Enterprise software systems</strong></li>
+                    <li><strong>Learning organizational IT operations and compliance</strong></li>
+                    <li><strong>Continuous professional skill development</strong></li>
+                </ul>
+            </div>
+
+            <!-- Referees -->
+            <div class="section">
+                <h2 class="section-title-main">Referees</h2>
+                <div class="item">
+                    <div class="item-subtitle">Available upon request</div>
+                    <ul class="item-details">
+                        <li><strong>Boniface Kiamba:</strong> +254 726487953</li>
+                        <li><strong>University References:</strong> Available from University of Eastern Africa, Baraton</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Buttons -->
+    <div class="controls">
+        <button class="btn btn-primary" onclick="generatePDF()">
+            <i class="fas fa-download"></i> Download as PDF
+        </button>
+        <button class="btn btn-secondary" onclick="printResume()">
+            <i class="fas fa-print"></i> Print Resume
+        </button>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "3000",
+        "extendedTimeOut": "1000"
+    };
+
+    function printResume() {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>David Ngunzu Kiamba - Resume</title>
+                <style>
+                    @page {
+                        size: A4;
+                        margin: 0;
+                    }
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+                        font-size: 11pt;
+                        line-height: 1.4;
+                    }
+                    .resume-container {
+                        width: 210mm;
+                        min-height: 297mm;
+                        display: flex;
+                    }
+                    .sidebar {
+                        width: 35%;
+                        background: linear-gradient(180deg, #1a4f8c 0%, #0d2c4d 100%) !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        color: white;
+                        padding: 35px 20px !important;
+                    }
+                    .main-content {
+                        width: 65%;
+                        padding: 35px 25px !important;
+                    }
+                    .header-sidebar {
+                        text-align: center;
+                        margin-bottom: 25px !important;
+                        padding-bottom: 15px !important;
+                        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                    }
+                    .name-sidebar {
+                        font-size: 20pt !important;
+                        font-weight: bold;
+                        margin-bottom: 6px !important;
+                    }
+                    .title-sidebar {
+                        font-size: 10pt !important;
+                        opacity: 0.9;
+                        margin-bottom: 3px !important;
+                    }
+                    .professional-badge {
+                        background: rgba(255, 255, 255, 0.1) !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        color: white;
+                        padding: 4px 10px;
+                        border-radius: 15px;
+                        font-size: 9pt;
+                        font-weight: 500;
+                        margin-top: 6px;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                    }
+                    .section {
+                        margin-bottom: 25px !important;
+                    }
+                    .section-title {
+                        font-size: 12pt !important;
+                        font-weight: bold;
+                        color: white;
+                        text-transform: uppercase;
+                        margin-bottom: 15px !important;
+                        padding-bottom: 8px !important;
+                        border-bottom: 2px solid #4da8da;
+                    }
+                    .section-title-main {
+                        font-size: 12pt !important;
+                        font-weight: bold;
+                        color: #2c3e50;
+                        text-transform: uppercase;
+                        margin-bottom: 15px !important;
+                        padding-bottom: 8px !important;
+                        border-bottom: 2px solid #1a4f8c;
+                    }
+                    .contact-info {
+                        margin-bottom: 25px !important;
+                    }
+                    .contact-item {
+                        display: flex;
+                        align-items: flex-start;
+                        margin-bottom: 14px !important;
+                        font-size: 9.5pt !important;
+                    }
+                    .contact-icon {
+                        width: 20px;
+                        color: #4da8da;
+                        font-size: 10pt;
+                        flex-shrink: 0;
+                        margin-top: 2px;
+                        margin-right: 8px;
+                    }
+                    .skill-item {
+                        margin-bottom: 20px !important;
+                    }
+                    .skill-name {
+                        font-weight: 600;
+                        color: white;
+                        font-size: 10pt !important;
+                        margin-bottom: 8px !important;
+                        display: block;
+                    }
+                    .skill-items {
+                        color: rgba(255, 255, 255, 0.9);
+                        font-size: 9.5pt !important;
+                        line-height: 1.6;
+                    }
+                    .skill-tag {
+                        display: inline-block;
+                        background: rgba(255, 255, 255, 0.15) !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        padding: 5px 10px !important;
+                        margin: 4px 3px !important;
+                        border-radius: 4px;
+                        font-size: 9pt !important;
+                        line-height: 1.3;
+                    }
+                    .availability {
+                        background: rgba(77, 168, 218, 0.2) !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        border-left: 4px solid #4da8da;
+                        padding: 15px !important;
+                        border-radius: 4px;
+                        margin-top: 12px !important;
+                        margin-bottom: 15px !important;
+                    }
+                    .availability-dates {
+                        font-weight: 700;
+                        color: white;
+                        font-size: 10pt !important;
+                        margin-top: 6px !important;
+                        display: block;
+                    }
+                    .item-details {
+                        padding-left: 18px !important;
+                    }
+                    .item-details li {
+                        margin-bottom: 8px !important;
+                        font-size: 10pt !important;
+                        line-height: 1.4;
+                    }
+                    .item-details li::before {
+                        content: '▸';
+                        color: #1a4f8c;
+                        position: absolute;
+                        left: -18px;
+                    }
+                    .name {
+                        font-size: 24pt !important;
+                        font-weight: bold;
+                        color: #2c3e50;
+                        margin-bottom: 6px !important;
+                    }
+                    .title {
+                        font-size: 12pt !important;
+                        font-weight: 600;
+                        color: #1a4f8c;
+                        margin-bottom: 8px !important;
+                    }
+                    .item {
+                        margin-bottom: 18px !important;
+                    }
+                    .item-title {
+                        font-weight: bold;
+                        color: #2c3e50;
+                        font-size: 11pt !important;
+                    }
+                    .item-subtitle {
+                        color: #1a4f8c;
+                        font-weight: 600;
+                        font-size: 10pt !important;
+                        margin-bottom: 8px !important;
+                        font-style: italic;
+                    }
+                    .item-date {
+                        color: #7f8c8d;
+                        font-size: 9pt !important;
+                        font-weight: 600;
+                        background: #f8f9fa;
+                        padding: 3px 8px;
+                        border-radius: 4px;
+                    }
+                    strong {
+                        font-weight: 700 !important;
+                    }
+                </style>
+            </head>
+            <body>
+                ${document.getElementById('resume-content').outerHTML}
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        setTimeout(() => window.close(), 100);
+                    }
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+
+    async function generatePDF() {
+        try {
+            const downloadBtn = document.querySelector('.btn-primary');
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            downloadBtn.disabled = true;
+
+            printResume();
+            
+            toastr.success('Opening print dialog for PDF generation...', 'Success');
+            
+            downloadBtn.innerHTML = originalText;
+            downloadBtn.disabled = false;
+            
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            toastr.error('Failed to generate PDF. Please try printing instead.', 'Error');
+            
+            const downloadBtn = document.querySelector('.btn-primary');
+            downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download as PDF';
+            downloadBtn.disabled = false;
+        }
+    }
+    </script>
+</body>
+</html>
