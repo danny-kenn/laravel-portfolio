@@ -1,59 +1,105 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Portfolio Builder — Technical Documentation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Developer:** David Kiamba
+**Phase:** 1 — Database Design \& Documentation 
 
-## About Laravel
+\---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1\. Technical Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+|Component|Choice|Reason|
+|-|-|-|
+|Framework|Laravel 12 (PHP)|Built-in auth scaffolding to build custom logic on top of, Eloquent ORM, Blade templating, native Queue system for background jobs|
+|Database|MySQL 8.0|ACID-compliant, strong relational/FK support, native JSON columns, team-familiar|
+|Authentication|Custom (bcrypt hashing, session-based)|No third-party OAuth per requirements — full control over hashing, sessions, and RBAC|
+|Queue Driver|Database queue (Laravel Queues)|Simple to set up on shared/sandbox hosting without a Redis dependency; upgradeable to Redis later|
+|Frontend|Blade + Bootstrap 5|Server-rendered, fast to iterate, matches the minimalist high-contrast aesthetic already approved|
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+\---
 
-## Learning Laravel
+## 2\. Why Custom Auth (Not Laravel Breeze/Fortify/Jetstream defaults as-is)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Public registration is closed — only admins can provision accounts — so the standard "self-register" flow those starter kits assume isn't used. Instead:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* Accounts are created by a **SuperAdmin/Admin** from the dashboard, not by public sign-up.
+* Passwords are hashed with **bcrypt** (Laravel's default `Hash::make()`), which is deliberately slow and salts automatically, making brute-force and rainbow-table attacks impractical.
+* Sessions are handled through Laravel's built-in session guard — no external OAuth providers, per the assignment's "no third-party auth" requirement.
+* On account creation, a **welcome/activation email** is dispatched to a **background queue job** rather than sent synchronously, so admin actions don't block on SMTP latency.
 
-## Laravel Sponsors
+\---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 3\. Role-Based Access Control (RBAC)
 
-### Premium Partners
+Five roles, enforced via middleware and Laravel policies/gates:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+|Role|Permissions|
+|-|-|
+|**SuperAdmin**|Full system control — manage users/roles, all content, view audit logs|
+|**Admin**|Manage all content, view users and contact messages, cannot delete SuperAdmin accounts|
+|**Editor**|Create, edit, publish all portfolio content (projects, blog, skills, etc.)|
+|**Author**|Create/edit own blog drafts only; requires Editor/Admin approval to publish|
+|**Viewer**|Read-only dashboard access (e.g. intern/attaché reviewing before promotion to a content role)|
 
-## Contributing
+Role checks happen at two layers: route-level middleware (blocks access to whole dashboard sections) and policy-level checks (blocks specific actions like "delete" vs "edit" within an allowed section).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+\---
 
-## Code of Conduct
+## 4\. Database Schema — Design Decisions
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Full schema and ERD are in `ERD.md`. Summary of key decisions:
 
-## Security Vulnerabilities
+1. **Single-portfolio model** — content tables aren't scoped by `user\_id` since this backs one person's public portfolio; `users` exists for dashboard auth/RBAC only.
+2. **Projects ↔ Tags, Blog ↔ Categories** — both modeled as proper many-to-many relationships via junction tables (`project\_tags`, `blog\_post\_categories`) rather than comma-separated strings, so tags/categories stay queryable and de-duplicated.
+3. **Audit logging** — every create/update/delete in the dashboard writes to `audit\_logs` (who, what, old vs new data as JSON, IP, user agent) for accountability during review.
+4. **Notifications table** — supports in-app notifications plus an `is\_emailed` flag, decoupling "shown in dashboard" from "sent via background email job."
+5. **Soft-disable over hard-delete** — `projects`, `certificates`, and `users` use an `is\_active` flag rather than deleting rows outright, preserving history and avoiding orphaned foreign keys.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+\---
 
-## License
+## 5\. Background Workers (Phase 3)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+* **Trigger**: A SuperAdmin/Admin provisions a new user account from the dashboard.
+* **Mechanism**: The request handler dispatches a `SendWelcomeEmailJob` onto Laravel's default queue connection (database driver) instead of sending the email inline — the HTTP response returns immediately.
+* **Worker**: `php artisan queue:work` runs as a persistent background process, picking jobs off the `jobs` table and executing them (with automatic retry on failure, logged to `failed\_jobs`).
+* **Why this matters**: keeps the admin's request/response cycle fast and avoids timeouts if the mail provider is slow, and gives a retry mechanism if delivery fails transiently.
+
+\---
+
+## 6\. Tables Summary
+
+|Table|Purpose|
+|-|-|
+|`users`|Auth + RBAC for the admin dashboard|
+|`profiles`|Public-facing bio/contact info (1:1 with a user)|
+|`education`|Education history entries|
+|`skills`|Skill list with category + proficiency|
+|`experiences`|Work experience timeline|
+|`projects`|Portfolio project entries|
+|`tags`|Tech-stack tags|
+|`project\_tags`|Projects ↔ Tags junction|
+|`blog\_posts`|Blog articles|
+|`blog\_categories`|Blog category taxonomy|
+|`blog\_post\_categories`|Blog posts ↔ Categories junction|
+|`certificates`|Certificates/badges with image or PDF|
+|`affiliations`|Professional affiliations/memberships|
+|`contact\_messages`|Public contact form submissions|
+|`audit\_logs`|System-wide action audit trail|
+|`notifications`|In-app + emailed notifications|
+
+\---
+
+## 7\. Deployment Plan (Phase 4 — pending sandbox access)
+
+1. Configure `.env` for the sandbox environment (DB credentials, mail driver, queue connection).
+2. Run `php artisan migrate --force` against the sandbox database.
+3. Seed the initial SuperAdmin account via a dedicated seeder (not public registration).
+4. Start `php artisan queue:work` as a persistent process (or configure via Supervisor if available on the sandbox).
+5. Verify: login, RBAC restrictions, CRUD operations, and end-to-end welcome-email delivery through the queue.
+
+\---
+
+## 8\. Open Questions for Review
+
+* Confirm whether the sandbox environment supports a persistent queue worker process (e.g. via Supervisor), or whether `queue:work` needs to run via a scheduled cron-triggered `queue:work --stop-when-empty` instead.
+* Confirm final list of RBAC roles — currently five (`SuperAdmin`, `Admin`, `Editor`, `Author`, `Viewer`); happy to collapse/expand to match team convention if there's an existing standard.
+
