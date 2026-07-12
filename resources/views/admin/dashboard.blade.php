@@ -1,6 +1,6 @@
 @extends('layouts.admin')
-@section('title','Dashboard')
-@section('page-title','Dashboard')
+@section('title', 'Dashboard')
+@section('page-title', 'Dashboard')
 @section('content')
 
 <div class="row g-3 mb-4">
@@ -38,7 +38,8 @@
   </div>
 </div>
 
-@if(auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
+<!-- 🔥 Admin stats only for SuperAdmin and Admin -->
+@if(!($stats['is_attache'] ?? false))
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-3">
     <div class="stat-card">
@@ -73,7 +74,8 @@
     <div class="c-card">
       <div class="c-card-header">
         <h6><i class="fas fa-code-branch me-2" style="color:var(--teal)"></i>Recent Projects</h6>
-        @if(auth()->user()->isEditor() || auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
+        <!-- 🔥 Only Admins and SuperAdmins can view all projects -->
+        @if(!($stats['is_attache'] ?? false))
         <a href="{{ route('admin.projects.index') }}" class="btn btn-ghost btn-sm">View All</a>
         @endif
       </div>
@@ -94,9 +96,10 @@
     </div>
   </div>
 
-  <!-- Recent Messages (admin+) or Blog (author+) -->
+  <!-- Recent Messages (Admin+) or Recent Blog (Attaché) -->
   <div class="col-md-6">
-    @if(auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
+    @if(!($stats['is_attache'] ?? false))
+    <!-- Admin+ sees messages -->
     <div class="c-card">
       <div class="c-card-header">
         <h6><i class="fas fa-envelope me-2" style="color:#ef4444"></i>Recent Messages</h6>
@@ -119,6 +122,7 @@
       </div>
     </div>
     @else
+    <!-- Attaché sees recent blog posts (read-only) -->
     <div class="c-card">
       <div class="c-card-header">
         <h6><i class="fas fa-newspaper me-2" style="color:var(--gold)"></i>Recent Blog Posts</h6>
@@ -148,7 +152,10 @@
       <div class="c-card-body">
         <p style="color:var(--text);margin:0;font-size:0.875rem;line-height:1.7">
           Use the sidebar to manage every section of your portfolio. Changes are <strong style="color:var(--teal)">saved instantly</strong> — forms open as modals (bottom sheets on mobile) so you never leave the page.
-          Upload certificate images and PDFs directly from the Certificates section. Use the <strong style="color:var(--gold)">☀ / 🌙</strong> button in the top right to switch between light and dark mode.
+          @if(!($stats['is_attache'] ?? false))
+          Upload certificate images and PDFs directly from the Certificates section. 
+          @endif
+          Use the <strong style="color:var(--gold)">☀ / 🌙</strong> button in the top right to switch between light and dark mode.
         </p>
       </div>
     </div>

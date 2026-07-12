@@ -22,27 +22,25 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         // 🔐 Audit Log
         AuditLogger::view('dashboard', 'Viewed dashboard');
-        
+
         // Basic stats for everyone
         $stats = [
             'total_projects' => Project::where('is_active', true)->count(),
             'total_certificates' => Certificate::where('is_active', true)->count(),
             'total_blog_posts' => BlogPost::where('status', 'published')->count(),
             'total_skills' => Skill::where('is_active', true)->count(),
-            'is_viewer' => $user->isViewer(),
-            'is_author' => $user->isAuthor(),
-            'is_editor' => $user->isEditor(),
-            'is_admin' => $user->isAdmin() || $user->isSuperAdmin(),
-            // 🔥 Viewers see the same as public - show recent content
+            'is_attache' => $user->isAttache(),
+            'is_admin' => $user->isAdmin(),
+            'is_super_admin' => $user->isSuperAdmin(),
             'recent_projects' => Project::where('is_active', true)->latest()->limit(5)->get(),
             'recent_blog_posts' => BlogPost::where('status', 'published')->latest()->limit(5)->get(),
         ];
 
-        // If not a viewer, add admin stats
-        if (!$user->isViewer()) {
+        // Add admin-only stats if not an Attaché/Intern
+        if (!$user->isAttache()) {
             $stats['total_users'] = User::count();
             $stats['active_users'] = User::where('is_active', true)->count();
             $stats['unread_messages'] = ContactMessage::where('is_read', false)->count();

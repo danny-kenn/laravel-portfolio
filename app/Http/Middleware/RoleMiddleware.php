@@ -30,9 +30,7 @@ class RoleMiddleware
         return match($role) {
             'super_admin' => $user->isSuperAdmin(),
             'admin'       => $user->isAdmin(),
-            'editor'      => $user->isEditor(),
-            'author'      => $user->isAuthor(),
-            'viewer'      => $user->isViewer(),
+            'attache'     => $user->isAttache(),
             default       => false
         };
     }

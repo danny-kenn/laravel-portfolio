@@ -18,7 +18,7 @@ class User extends Authenticatable
         'role',
         'is_active',
         'last_login',
-        'email_notifications',  // ← ADD THIS
+        'email_notifications',
     ];
 
     protected $hidden = [
@@ -29,7 +29,7 @@ class User extends Authenticatable
     protected $casts = [
         'is_active' => 'boolean',
         'last_login' => 'datetime',
-        'email_notifications' => 'array',  // ← ADD THIS (auto-decodes JSON)
+        'email_notifications' => 'array',
     ];
 
     // ============ ROLE CHECKING METHODS ============
@@ -44,24 +44,9 @@ class User extends Authenticatable
         return in_array($this->role, ['super_admin', 'admin']);
     }
 
-    public function isEditor(): bool
+    public function isAttache(): bool
     {
-        return in_array($this->role, ['super_admin', 'admin', 'editor']);
-    }
-
-    public function isAuthor(): bool
-    {
-        return in_array($this->role, ['super_admin', 'admin', 'editor', 'author']);
-    }
-
-    public function isViewer(): bool
-    {
-        return $this->role === 'viewer';
-    }
-
-    public function canPublish(): bool
-    {
-        return in_array($this->role, ['super_admin', 'admin', 'editor']);
+        return $this->role === 'attache';
     }
 
     public function canManageUsers(): bool
@@ -69,9 +54,19 @@ class User extends Authenticatable
         return in_array($this->role, ['super_admin', 'admin']);
     }
 
-    public function canDeleteContent(): bool
+    public function canPublish(): bool
     {
         return in_array($this->role, ['super_admin', 'admin']);
+    }
+
+    public function canManageContent(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin']);
+    }
+
+    public function canCreateDrafts(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'attache']);
     }
 
     public function getRoleDisplayName(): string
@@ -79,9 +74,7 @@ class User extends Authenticatable
         return match($this->role) {
             'super_admin' => 'Super Administrator',
             'admin'       => 'Administrator',
-            'editor'      => 'Editor',
-            'author'      => 'Author',
-            'viewer'      => 'Viewer',
+            'attache'     => 'Attaché / Intern',
             default       => 'User'
         };
     }

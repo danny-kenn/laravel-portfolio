@@ -25,27 +25,20 @@ class BlogController extends Controller
     {
         $user = auth()->user();
         $role = $user->role; // Get exact role
-        
+
         // Build query based on EXACT role
         $query = BlogPost::with(['categories', 'tags', 'author']);
-        
+
         // 🔥 Use EXACT role matching, NOT hierarchical
-        if ($role === 'author') {
-            // Authors: ONLY see their own posts
+        if ($role === 'attache') {
+            // Attaché/Intern: ONLY see their own posts
             $query->where('author_id', $user->id);
-        } 
-        elseif ($role === 'editor') {
-            // Editors: See all posts EXCEPT other people's archived posts
-            $query->where(function($q) use ($user) {
-                $q->where('status', '!=', 'archived')
-                  ->orWhere('author_id', $user->id);
-            });
         }
         // Admins and SuperAdmins: See EVERYTHING (no filter needed)
 
         if ($request->has('json') && $request->json == 1) {
             $posts = $query->orderBy('created_at', 'desc')->get();
-            
+
             $formattedPosts = $posts->map(function($post) {
                 return [
                     'id' => $post->id,
@@ -69,10 +62,10 @@ class BlogController extends Controller
                     'author_id' => $post->author_id,
                 ];
             });
-            
+
             return response()->json(['success' => true, 'data' => $formattedPosts]);
         }
-        
+
         $posts = $query->orderBy('created_at', 'desc')->get();
         return view('admin.blog', compact('posts'));
     }
@@ -106,24 +99,12 @@ class BlogController extends Controller
             $user = auth()->user();
             $role = $user->role;
 
-            // 🔥 EXACT role matching for Authors
-            if ($role === 'author') {
-                // Authors can ONLY create drafts
+            // 🔥 Attaché/Intern can ONLY create drafts
+            if ($role === 'attache') {
                 if ($validated['status'] !== 'draft') {
                     return response()->json([
-                        'success' => false, 
-                        'message' => 'Authors can only create drafts. Please ask an Editor or Admin to publish.'
-                    ], 403);
-                }
-            }
-            
-            // 🔥 EXACT role matching for Editors
-            if ($role === 'editor') {
-                // Editors cannot create archived posts
-                if ($validated['status'] === 'archived') {
-                    return response()->json([
-                        'success' => false, 
-                        'message' => 'Editors cannot archive posts. Only Admins and SuperAdmins can archive.'
+                        'success' => false,
+                        'message' => 'Attaché/Intern can only create drafts. Please ask an Admin or SuperAdmin to publish.'
                     ], 403);
                 }
             }
@@ -143,7 +124,7 @@ class BlogController extends Controller
             $baseSlug = Str::slug($validated['title']);
             $slug = $baseSlug;
             $counter = 1;
-            
+
             while (BlogPost::where('slug', $slug)->exists()) {
                 $slug = $baseSlug . '-' . $counter;
                 $counter++;
@@ -191,19 +172,11 @@ class BlogController extends Controller
 
             AuditLogger::create('blog', "Created blog post: {$post->title} (Status: {$post->status})", $post->toArray());
 
-            // 🔔 Notify Editors about new draft
+            // 🔔 Notify Admins/SuperAdmins about new draft (editor role no longer exists)
             if ($post->status === 'draft') {
-                NotificationHelper::sendToRole(
-                    'editor',
-                    "📝 New Blog Draft",
-                    "Author '{$user->full_name}' has created a new draft: '{$post->title}'. Please review and publish.",
-                    'info',
-                    'blog',
-                    'draft'
-                );
                 NotificationHelper::sendToAdmins(
-                    "New Blog Draft",
-                    "Author '{$user->full_name}' has created a new draft: '{$post->title}'.",
+                    "📝 New Blog Draft",
+                    "'{$user->full_name}' has created a new draft: '{$post->title}'. Please review and publish.",
                     'info',
                     'blog',
                     'draft'
@@ -211,7 +184,7 @@ class BlogController extends Controller
             }
 
             return response()->json(['success' => true, 'message' => 'Blog post created!']);
-            
+
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
@@ -225,9 +198,9 @@ class BlogController extends Controller
         $post = BlogPost::with(['categories', 'tags', 'author'])->findOrFail($id);
         $user = auth()->user();
         $role = $user->role;
-        
-        // 🔥 EXACT role matching for Authors
-        if ($role === 'author') {
+
+        // 🔥 EXACT role matching for Attaché/Intern
+        if ($role === 'attache') {
             if ($post->author_id !== $user->id) {
                 abort(403, 'You can only edit your own posts.');
             }
@@ -235,14 +208,7 @@ class BlogController extends Controller
                 abort(403, 'You can only edit draft posts.');
             }
         }
-        
-        // 🔥 EXACT role matching for Editors
-        if ($role === 'editor') {
-            if ($post->status === 'archived' && $post->author_id !== $user->id) {
-                abort(403, 'You can only edit your own archived posts.');
-            }
-        }
-        
+
         $categories = BlogCategory::all();
         $tags = BlogTag::all();
         $selectedCategories = $post->categories->pluck('id')->toArray();
@@ -260,44 +226,25 @@ class BlogController extends Controller
             $user = auth()->user();
             $role = $user->role;
             $oldData = $post->toArray();
-            $oldStatus = $post->status;
-            
-            // 🔥 EXACT role matching for Authors
-            if ($role === 'author') {
+
+            // 🔥 EXACT role matching for Attaché/Intern
+            if ($role === 'attache') {
                 if ($post->author_id !== $user->id) {
                     return response()->json([
-                        'success' => false, 
+                        'success' => false,
                         'message' => 'You can only edit your own posts.'
                     ], 403);
                 }
                 if ($post->status !== 'draft') {
                     return response()->json([
-                        'success' => false, 
+                        'success' => false,
                         'message' => 'You can only edit draft posts.'
                     ], 403);
                 }
-                if (!in_array($request->status, ['draft', 'archived'])) {
+                if ($request->status !== 'draft') {
                     return response()->json([
-                        'success' => false, 
-                        'message' => 'Authors can only change status to Draft or Archive.'
-                    ], 403);
-                }
-            }
-            
-            // 🔥 EXACT role matching for Editors
-            if ($role === 'editor') {
-                // Can't edit others' archived posts
-                if ($post->status === 'archived' && $post->author_id !== $user->id) {
-                    return response()->json([
-                        'success' => false, 
-                        'message' => 'You can only edit your own archived posts.'
-                    ], 403);
-                }
-                // Can't archive any post
-                if ($request->status === 'archived') {
-                    return response()->json([
-                        'success' => false, 
-                        'message' => 'Editors cannot archive posts. Only Admins can archive.'
+                        'success' => false,
+                        'message' => 'Attaché/Intern cannot publish posts. Ask an Admin or SuperAdmin to publish.'
                     ], 403);
                 }
             }
@@ -332,7 +279,7 @@ class BlogController extends Controller
                 $baseSlug = Str::slug($validated['title']);
                 $slug = $baseSlug;
                 $counter = 1;
-                
+
                 while (BlogPost::where('slug', $slug)->where('id', '!=', $id)->exists()) {
                     $slug = $baseSlug . '-' . $counter;
                     $counter++;
@@ -377,7 +324,7 @@ class BlogController extends Controller
             AuditLogger::update('blog', "Updated blog post: {$post->title}", $oldData, $post->toArray());
 
             return response()->json(['success' => true, 'message' => 'Blog post updated!']);
-            
+
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
@@ -394,39 +341,23 @@ class BlogController extends Controller
             $role = $user->role;
             $data = $post->toArray();
             $title = $post->title;
-            
-            // 🔥 EXACT role matching for Authors
-            if ($role === 'author') {
+
+            // 🔥 EXACT role matching for Attaché/Intern
+            if ($role === 'attache') {
                 if ($post->author_id !== $user->id) {
                     return response()->json([
-                        'success' => false, 
+                        'success' => false,
                         'message' => 'You can only delete your own posts.'
                     ], 403);
                 }
                 if ($post->status !== 'draft') {
                     return response()->json([
-                        'success' => false, 
+                        'success' => false,
                         'message' => 'You can only delete draft posts.'
                     ], 403);
                 }
             }
-            
-            // 🔥 EXACT role matching for Editors
-            if ($role === 'editor') {
-                if ($post->status === 'archived' && $post->author_id !== $user->id) {
-                    return response()->json([
-                        'success' => false, 
-                        'message' => 'You can only delete your own archived posts.'
-                    ], 403);
-                }
-                if ($post->status === 'published') {
-                    return response()->json([
-                        'success' => false, 
-                        'message' => 'Editors cannot delete published posts. Ask an Admin.'
-                    ], 403);
-                }
-            }
-            
+
             $post->categories()->detach();
             $post->tags()->detach();
             $post->delete();
@@ -434,7 +365,7 @@ class BlogController extends Controller
             AuditLogger::delete('blog', "Deleted blog post: {$title}", $data);
 
             return response()->json(['success' => true, 'message' => 'Deleted!']);
-            
+
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }

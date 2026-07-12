@@ -248,9 +248,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .badge { border-radius: 20px; font-size: 0.72rem; font-weight: 600; padding: 0.25em 0.75em; }
 .badge-role-super { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
 .badge-role-admin { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); }
-.badge-role-editor { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
-.badge-role-author { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
-.badge-role-viewer { background: rgba(107,114,128,0.15); color: #6b7280; border: 1px solid rgba(107,114,128,0.2); }
+.badge-role-attache { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
 .badge-status-pub { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
 .badge-status-draft { background: rgba(234,179,8,0.15); color: #eab308; border: 1px solid rgba(234,179,8,0.3); }
 .badge-status-arch { background: rgba(107,114,128,0.15); color: #6b7280; border: 1px solid rgba(107,114,128,0.2); }
@@ -401,7 +399,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
       <i class="fas fa-user-circle"></i> Profile & Settings
     </a>
 
-    @if(auth()->user()->isEditor() || auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
+    @if(auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
     <div class="nav-group-label">Portfolio Content</div>
     <a href="{{ route('admin.education.index') }}" class="sidebar-link @if(request()->routeIs('admin.education.*')) active @endif">
       <i class="fas fa-graduation-cap"></i> Education
@@ -423,18 +421,18 @@ textarea.form-control { resize: vertical; min-height: 100px; }
     </a>
     @endif
 
-    @if(auth()->user()->isAuthor() || auth()->user()->isEditor() || auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
     <div class="nav-group-label">Blog</div>
     <a href="{{ route('admin.blog.index') }}" class="sidebar-link @if(request()->routeIs('admin.blog.*')) active @endif">
       <i class="fas fa-newspaper"></i> Blog Posts
     </a>
-    @endif
 
     @if(auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
     <div class="nav-group-label">System</div>
+    @if(auth()->user()->isSuperAdmin())
     <a href="{{ route('admin.users.index') }}" class="sidebar-link @if(request()->routeIs('admin.users.*')) active @endif">
       <i class="fas fa-users-cog"></i> Users
     </a>
+    @endif
     <a href="{{ route('admin.messages') }}" class="sidebar-link @if(request()->routeIs('admin.messages')) active @endif">
       <i class="fas fa-envelope"></i> Messages
       @php $unread = \App\Models\ContactMessage::where('is_read',0)->count() @endphp
@@ -575,8 +573,6 @@ function closeModal(id) {
 }
 
 // Close on overlay click — unless the modal opts out via data-backdrop="static".
-// Use this on any modal that wraps a form, so a stray click outside it
-// can't silently discard what someone was typing.
 document.addEventListener('click', e => {
   if (e.target.classList.contains('modal-overlay')) {
     if (e.target.dataset.backdrop === 'static') return;

@@ -43,19 +43,20 @@ Route::get('/certificates/{filename}', function ($filename) {
     // 🔥 Security: Only allow valid image/PDF extensions
     $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
     $extension = pathinfo($filename, PATHINFO_EXTENSION);
-    
+
     if (!in_array(strtolower($extension), $allowedExtensions)) {
         abort(404);
     }
-    
+
     $path = public_path('certificates/' . $filename);
     if (!file_exists($path)) {
         abort(404);
     }
-    
+
     $mime = mime_content_type($path);
     return response()->file($path, ['Content-Type' => $mime]);
 })->name('certificates.serve');
+
 // ============================================
 // AUTHENTICATION ROUTES
 // ============================================
@@ -69,73 +70,73 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // ============================================
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    
+
     // === DASHBOARD - Everyone with auth can view ===
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // === PROFILE - Everyone can manage their own profile ===
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
-    
-    // === EDUCATION - Editors and above ===
-    Route::middleware(['role:editor,admin,super_admin'])->group(function () {
+
+    // === EDUCATION - Admins and SuperAdmins only ===
+    Route::middleware(['role:admin,super_admin'])->group(function () {
         Route::resource('education', EducationController::class)->except(['show']);
     });
-    
-    // === SKILLS - Editors and above ===
-    Route::middleware(['role:editor,admin,super_admin'])->group(function () {
+
+    // === SKILLS - Admins and SuperAdmins only ===
+    Route::middleware(['role:admin,super_admin'])->group(function () {
         Route::resource('skills', SkillController::class)->except(['show']);
     });
-    
-    // === EXPERIENCE - Editors and above ===
-    Route::middleware(['role:editor,admin,super_admin'])->group(function () {
+
+    // === EXPERIENCE - Admins and SuperAdmins only ===
+    Route::middleware(['role:admin,super_admin'])->group(function () {
         Route::resource('experience', ExperienceController::class)->except(['show']);
     });
-    
-    // === PROJECTS - Editors and above ===
-    Route::middleware(['role:editor,admin,super_admin'])->group(function () {
+
+    // === PROJECTS - Admins and SuperAdmins only ===
+    Route::middleware(['role:admin,super_admin'])->group(function () {
         Route::resource('projects', ProjectController::class)->except(['show']);
     });
-    
-    // === CERTIFICATES - Editors and above ===
-    Route::middleware(['role:editor,admin,super_admin'])->group(function () {
+
+    // === CERTIFICATES - Admins and SuperAdmins only ===
+    Route::middleware(['role:admin,super_admin'])->group(function () {
         Route::resource('certificates', CertificateController::class)->except(['show']);
     });
-    
-    // === AFFILIATIONS - Editors and above ===
-    Route::middleware(['role:editor,admin,super_admin'])->group(function () {
+
+    // === AFFILIATIONS - Admins and SuperAdmins only ===
+    Route::middleware(['role:admin,super_admin'])->group(function () {
         Route::resource('affiliations', AffiliationController::class)->except(['show']);
     });
-    
-    // === BLOG - Authors can create drafts, Editors and above can publish ===
-    Route::middleware(['role:author,editor,admin,super_admin'])->group(function () {
+
+    // === BLOG - Attaché can create drafts, Admins and SuperAdmins can publish ===
+    Route::middleware(['role:attache,admin,super_admin'])->group(function () {
         Route::resource('blog', AdminBlogController::class)->except(['show']);
     });
-    
+
     // === USERS - SuperAdmin only ===
     Route::middleware(['role:super_admin'])->group(function () {
         Route::resource('users', UserController::class);
         Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
     });
-    
-    // === MESSAGES - Admins and above only ===
+
+    // === MESSAGES - Admins and SuperAdmins only ===
     Route::middleware(['role:admin,super_admin'])->group(function () {
         Route::get('/messages', [MessageController::class, 'index'])->name('messages');
         Route::post('/messages/{id}/read', [MessageController::class, 'markRead'])->name('messages.read');
         Route::delete('/messages/{id}', [MessageController::class, 'destroy'])->name('messages.destroy');
     });
-    
+
     // === NOTIFICATIONS - All authenticated users ===
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
-    
-    // === AUDIT LOGS - Admins and above ===
+
+    // === AUDIT LOGS - Admins and SuperAdmins only ===
     Route::middleware(['role:admin,super_admin'])->group(function () {
         Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs');
     });
-    
+
     // === THEME SETTING ===
     Route::get('/set-theme', function (Request $request) {
         if ($request->has('theme')) {

@@ -40,46 +40,31 @@
       <div class="mb-3"><label class="form-label">Excerpt <span style="color:var(--text2);font-size:0.78rem">(optional short summary)</span></label><textarea id="bExcerpt" class="form-control" rows="2"></textarea></div>
       <div class="mb-3"><label class="form-label">Body <span style="color:#ef4444">*</span></label><textarea id="bBody" class="form-control" rows="8" required></textarea></div>
       <div class="mb-3"><label class="form-label">Featured Image URL</label><input type="url" id="bImg" class="form-control" placeholder="https://…"></div>
-      
+
       <!-- 🔥 Status - Role-based display -->
       <div class="row g-2 mb-3">
         <div class="col-md-6">
           <label class="form-label">Status</label>
           @php
             $user = auth()->user();
-            $isAuthor = $user->isAuthor();
-            $isEditor = $user->isEditor();
-            $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
+            $isAttache = $user->isAttache();
+            $isAdmin = $user->isAdmin(); // covers both admin and super_admin
           @endphp
-          
-          @if($isAuthor || $isEditor)
-            <!-- 🔥 Authors and Editors can choose Draft, Publish (Editors), or Archive (both) -->
+
+          @if($isAttache)
+            <!-- 🔥 Attaché/Intern can ONLY save drafts -->
             <div class="status-toggle-group" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
               <button type="button" class="status-btn status-draft active" data-value="draft" onclick="setStatus('draft')">
                 <i class="fas fa-pencil-alt me-1"></i>Draft
               </button>
-              @if($isEditor)
-              <button type="button" class="status-btn status-published" data-value="published" onclick="setStatus('published')">
-                <i class="fas fa-check-circle me-1"></i>Publish
-              </button>
-              @endif
-              <button type="button" class="status-btn status-archived" data-value="archived" onclick="setStatus('archived')">
-                <i class="fas fa-archive me-1"></i>Archive
-              </button>
             </div>
-            @if($isAuthor)
             <small style="color:var(--text3);display:block;margin-top:6px;">
-              <i class="fas fa-info-circle me-1"></i> Drafts are visible to Editors and above. Archives are only visible to you.
+              <i class="fas fa-info-circle me-1"></i> You can only save drafts. Ask an Admin or SuperAdmin to publish.
             </small>
-            @else
-            <small style="color:var(--text3);display:block;margin-top:6px;">
-              <i class="fas fa-info-circle me-1"></i> You can see all posts. Archived posts are only visible to Admins and the author.
-            </small>
-            @endif
             <input type="hidden" id="bStatus" value="draft">
-            
+
           @elseif($isAdmin)
-            <!-- 🔥 Admins can choose Draft, Publish, or Archive -->
+            <!-- 🔥 Admins and SuperAdmins can choose Draft, Publish, or Archive -->
             <div class="status-toggle-group" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
               <button type="button" class="status-btn status-draft active" data-value="draft" onclick="setStatus('draft')">
                 <i class="fas fa-pencil-alt me-1"></i>Draft
@@ -99,7 +84,7 @@
           <input type="text" id="bCats" class="form-control" placeholder="Tech, Engineering…">
         </div>
       </div>
-      
+
       <div class="mb-3">
         <label class="form-label">Tags <span style="color:var(--text2);font-size:0.78rem">(comma-separated, with or without #)</span></label>
         <input type="text" id="bTags" class="form-control" placeholder="#SoftwareEngineering, #KonzaTechnopolis, #PHP">
@@ -226,10 +211,10 @@ function openBlogModal(d = null) {
   document.getElementById('bCats').value      = d?.categories_string ?? '';
   document.getElementById('bTags').value      = d?.tags_string ?? '';
   document.getElementById('blogModalTitle').textContent = d ? 'Edit Post' : 'New Blog Post';
-  
+
   const status = d?.status || 'draft';
   document.getElementById('bStatus').value = status;
-  
+
   // Highlight active status
   document.querySelectorAll('.status-btn').forEach(btn => {
     btn.classList.remove('active');
@@ -238,7 +223,7 @@ function openBlogModal(d = null) {
   if (activeBtn) {
     activeBtn.classList.add('active');
   }
-  
+
   openModal('blogModal');
 }
 
@@ -258,16 +243,16 @@ async function saveBlog() {
   fd.set('tags', document.getElementById('bTags').value);
   try {
     const url = id ? `/admin/blog/${id}` : '{{ route("admin.blog.store") }}';
-    const r = await fetch(url, { method:'POST', body:fd }); 
+    const r = await fetch(url, { method:'POST', body:fd });
     const j = await r.json();
     if (!j.success) throw new Error(j.message);
-    showToast(j.message||'Saved!'); 
-    closeModal('blogModal'); 
+    showToast(j.message||'Saved!');
+    closeModal('blogModal');
     loadBlog();
-  } catch(e) { 
-    showToast(e.message||'Error','error'); 
+  } catch(e) {
+    showToast(e.message||'Error','error');
   }
-  btn.disabled = false; 
+  btn.disabled = false;
   btn.innerHTML = '<i class="fas fa-save me-1"></i>Save Post';
 }
 
@@ -280,51 +265,51 @@ function openDeleteModal(id) {
 async function confirmDelete() {
   const id = document.getElementById('deleteId').value;
   if (!id) return;
-  
+
   const btn = document.getElementById('confirmDeleteBtn');
-  btn.disabled = true; 
+  btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting…';
-  
-  const fd = new FormData(); 
-  fd.set('_method','DELETE'); 
+
+  const fd = new FormData();
+  fd.set('_method','DELETE');
   fd.set('_token', csrf());
-  
+
   try {
-    const r = await fetch(`/admin/blog/${id}`, { method:'POST', body:fd }); 
+    const r = await fetch(`/admin/blog/${id}`, { method:'POST', body:fd });
     const j = await r.json();
-    if (j.success) { 
-      showToast('Deleted successfully', 'success'); 
-      closeModal('deleteModal'); 
-      loadBlog(); 
-    } else { 
-      showToast(j.message||'Error', 'error'); 
+    if (j.success) {
+      showToast('Deleted successfully', 'success');
+      closeModal('deleteModal');
+      loadBlog();
+    } else {
+      showToast(j.message||'Error', 'error');
     }
-  } catch(e) { 
-    showToast('Something went wrong', 'error'); 
+  } catch(e) {
+    showToast('Something went wrong', 'error');
   }
-  
-  btn.disabled = false; 
+
+  btn.disabled = false;
   btn.innerHTML = '<i class="fas fa-trash me-1"></i>Delete';
   _deleteId = null;
 }
 
 async function loadBlog() {
   try {
-    const r = await fetch('/admin/blog?json=1'); 
+    const r = await fetch('/admin/blog?json=1');
     const j = await r.json();
     const body = document.getElementById('blogBody');
-    if (!j.data?.length) { 
-      body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text2)">No posts yet.</td></tr>'; 
-      return; 
+    if (!j.data?.length) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text2)">No posts yet.</td></tr>';
+      return;
     }
-    
+
     let html = '';
     for (const p of j.data) {
       const isOwn = {{ auth()->id() }} === p.author_id;
-      const showActions = ({{ auth()->user()->isAuthor() ? 'true' : 'false' }} && isOwn) || 
-                          ({{ auth()->user()->isEditor() ? 'true' : 'false' }}) || 
-                          ({{ auth()->user()->isAdmin() || auth()->user()->isSuperAdmin() ? 'true' : 'false' }});
-      
+      // 🔥 Attaché can only act on their own posts. Admins and SuperAdmins can act on everything.
+      const showActions = ({{ auth()->user()->isAttache() ? 'true' : 'false' }} && isOwn) ||
+                          ({{ auth()->user()->isAdmin() ? 'true' : 'false' }});
+
       const dataAttrs = [
         `data-id="${p.id}"`,
         `data-title="${escapeAttr(p.title || '')}"`,
@@ -336,9 +321,9 @@ async function loadBlog() {
         `data-tags="${escapeAttr((p.tags || []).map(t => t.name).join(', '))}"`,
         `data-author="${escapeAttr(p.author_name || 'Unknown')}"`
       ].join(' ');
-      
+
       const statusBadge = p.status === 'published' ? 'badge-status-pub' : p.status === 'draft' ? 'badge-status-draft' : 'badge-status-arch';
-      
+
       html += `<tr ${dataAttrs}>
         <td style="font-weight:500">${escapeHtml(p.title)}</td>
         <td style="color:var(--text2);font-size:0.85rem;">
